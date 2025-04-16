@@ -1,3 +1,4 @@
+require('dotenv').config();
 const winston = require('winston');
 require('winston-daily-rotate-file');
 const path = require('path');
@@ -33,7 +34,7 @@ if (process.env.LOG_TO_FILE === 'true') {
   logger.add(fileTransport);
   logger.info('File logging enabled.');
 } else {
-  logger.info('File logging is disabled. Set LOG_TO_FILE=true to enable it.');
+  logger.info('File logging is disabled. Set LOG_TO_FILE=true to enable it.', process.env.LOG_TO_FILE);
 }
 
 // Add console logging if LOG_TO_CONSOLE is true
@@ -47,7 +48,7 @@ if (process.env.LOG_TO_CONSOLE === 'true') {
   }));
   logger.info('Console logging enabled.');
 } else {
-  logger.info('Console logging is disabled. Set LOG_TO_CONSOLE=true to enable it.');
+  logger.info('Console logging is disabled. Set LOG_TO_CONSOLE=true to enable it.', process.env.LOG_TO_CONSOLE);
 }
 
 // If no transports are configured, add a default console transport to prevent errors

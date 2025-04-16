@@ -1,5 +1,7 @@
 const http = require('http');
+require('dotenv').config();
 const logger = require('./logger');
+
 
 // Get port from environment variable or use default
 const PORT = process.env.PORT || 8080;
