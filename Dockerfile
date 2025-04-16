@@ -13,10 +13,6 @@ COPY . .
 # Create logs directory
 RUN mkdir -p logs
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV LOG_TO_CONSOLE=true
-
 # Expose port (if needed)
 # EXPOSE 3000
 

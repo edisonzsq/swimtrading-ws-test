@@ -37,6 +37,7 @@ docker run -e WS_URL=your_ws_url -e TOKEN=your_token -e TASTY_API_URL=your_api_u
    - `USERNAME`: TastyTrade username
    - `PASSWORD`: TastyTrade password
    - `LOG_TO_CONSOLE`: Set to "true" to enable console logging
+   - `LOG_TO_FILE`: Set to "true" to enable file logging
 9. Choose your plan and region
 10. Click "Create Resources"
 
@@ -48,7 +49,8 @@ docker run -e WS_URL=your_ws_url -e TOKEN=your_token -e TASTY_API_URL=your_api_u
 - `USERNAME`: TastyTrade username
 - `PASSWORD`: TastyTrade password
 - `LOG_TO_CONSOLE`: Set to "true" to enable console logging (default: false)
+- `LOG_TO_FILE`: Set to "true" to enable file logging (default: false)
 
 ## Logging
 
-Logs are stored in the `logs` directory with daily rotation. Each log file is limited to 10MB and logs are kept for 14 days. 
+Logs are stored in the `logs` directory with daily rotation. Each log file is limited to 10MB and logs are kept for 14 days. If neither `LOG_TO_CONSOLE` nor `LOG_TO_FILE` is enabled, a default console transport will be used to prevent errors. 

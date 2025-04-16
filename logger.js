@@ -11,6 +11,13 @@ const logFormat = winston.format.combine(
   winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
 );
 
+// Create a logger instance with default configuration
+const logger = winston.createLogger({
+  level: 'info', // Default log level
+  transports: [] // Start with no transports
+});
+
+// Add file transport if LOG_TO_FILE is true
 if (process.env.LOG_TO_FILE === 'true') {
   // Create a rotating file transport
   const fileTransport = new winston.transports.DailyRotateFile({
@@ -22,19 +29,14 @@ if (process.env.LOG_TO_FILE === 'true') {
     level: 'info',      // Log level for the file
     format: logFormat
   });
+  
+  logger.add(fileTransport);
+  logger.info('File logging enabled.');
+} else {
+  logger.info('File logging is disabled. Set LOG_TO_FILE=true to enable it.');
 }
 
-// Create a logger instance
-const logger = winston.createLogger({
-  level: 'info', // Default log level
-  transports: [
-    fileTransport
-    // Console transport will be added conditionally below
-  ]
-});
-
-// Add console logging if environment variable is set
-// Example: export LOG_TO_CONSOLE=true
+// Add console logging if LOG_TO_CONSOLE is true
 if (process.env.LOG_TO_CONSOLE === 'true') {
   logger.add(new winston.transports.Console({
     level: 'info', // Log level for the console
@@ -48,6 +50,17 @@ if (process.env.LOG_TO_CONSOLE === 'true') {
   logger.info('Console logging is disabled. Set LOG_TO_CONSOLE=true to enable it.');
 }
 
+// If no transports are configured, add a default console transport to prevent errors
+if (logger.transports.length === 0) {
+  logger.add(new winston.transports.Console({
+    level: 'info',
+    format: winston.format.combine(
+      winston.format.colorize(),
+      logFormat
+    )
+  }));
+  logger.warn('No logging transports configured. Using default console transport.');
+}
 
 logger.info(`Logging initialized. Logs will be stored in: ${logDir}`);
 
