@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 require('dotenv').config();
+const logger = require('./logger');
 
 // WebSocket connection details
 const WS_URL = process.env.WS_URL;
@@ -20,12 +21,12 @@ const startKeepAlive = () => {
 
   keepAliveInstance = setInterval(() => {
     ws.send(JSON.stringify(keepAliveMessage));
-    console.log('Keepalive message sent.');
+    logger.info('Keepalive message sent.');
   }, keepAliveTimeout);
 };
 
 ws.on('open', () => {
-  console.log('WebSocket connection opened.');
+  logger.info('WebSocket connection opened.');
 
   // Send SETUP message
   const setupMessage = {
@@ -36,7 +37,7 @@ ws.on('open', () => {
     version: "0.1-js/1.0.0"
   };
   ws.send(JSON.stringify(setupMessage));
-  console.log('SETUP message sent.');
+  logger.info('SETUP message sent.');
 
   // Send AUTH message with token
   const authMessage = {
@@ -45,7 +46,7 @@ ws.on('open', () => {
     token: TOKEN
   };
   ws.send(JSON.stringify(authMessage));
-  console.log('AUTH message sent.');
+  logger.info('AUTH message sent.');
 
   // Open a new channel for FEED service
   const openMessage = {
@@ -57,7 +58,7 @@ ws.on('open', () => {
     }
   };
   ws.send(JSON.stringify(openMessage));
-  console.log('OPEN message sent for channel 1.');
+  logger.info('OPEN message sent for channel 1.');
 
   // Subscribe to Quote events
   const subQuoteMessage = {
@@ -71,7 +72,7 @@ ws.on('open', () => {
     ]
   };
   ws.send(JSON.stringify(subQuoteMessage));
-  console.log('Quote Subscription message sent for', symbol);
+  logger.info(`Quote Subscription message sent for ${symbol}`);
 
   // Subscribe to Greeks events
   const subGreeksMessage = {
@@ -85,7 +86,7 @@ ws.on('open', () => {
     ]
   };
   ws.send(JSON.stringify(subGreeksMessage));
-  console.log('Greeks Subscription message sent for', symbol);
+  logger.info(`Greeks Subscription message sent for ${symbol}`);
 
   // Subscribe to Summary events
   const subSummaryMessage = {
@@ -99,7 +100,7 @@ ws.on('open', () => {
     ]
   };
   ws.send(JSON.stringify(subSummaryMessage));
-  console.log('Summary Subscription message sent for', symbol);
+  logger.info(`Summary Subscription message sent for ${symbol}`);
 
   startKeepAlive();
 });
@@ -107,20 +108,20 @@ ws.on('open', () => {
 ws.on('message', (data) => {
   try {
     const message = JSON.parse(data);
-    console.log(`${counter} Received message:`, JSON.stringify(message, null, 2));
+    logger.info(`${counter} Received message: ${JSON.stringify(message, null, 2)}`);
     counter++;
   } catch (error) {
-    console.error('Error parsing message:', error);
+    logger.error('Error parsing message:', error);
   }
 });
 
 ws.on('error', (error) => {
-  console.error(`${counter} WebSocket error:`, error);
+  logger.error(`${counter} WebSocket error:`, error);
   counter++;
 });
 
 ws.on('close', (code, reason) => {
-  console.log(`WebSocket closed. Code: ${code}, Reason: ${reason}`);
+  logger.info(`WebSocket closed. Code: ${code}, Reason: ${reason.toString()}`);
   if (keepAliveInstance) {
     clearInterval(keepAliveInstance);
   }
@@ -142,6 +143,6 @@ function generateDxFeedOptionSymbol(underlying, expiration, type, strike) {
 
   const strikeFormatted = String(Math.round(strike * 1000)).padStart(8, '0');
   const symbol = `${underlying.toUpperCase()}${yy}${mm}${dd}${type.toUpperCase()}${strikeFormatted}`;
-  console.log(`Generated symbol: ${symbol}`);
+  logger.info(`Generated symbol: ${symbol}`);
   return symbol;
 }
