@@ -11,16 +11,18 @@ const logFormat = winston.format.combine(
   winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
 );
 
-// Create a rotating file transport
-const fileTransport = new winston.transports.DailyRotateFile({
-  filename: path.join(logDir, 'application-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true, // zip logs
-  maxSize: '10m',     // max size 10MB
-  maxFiles: '14d',    // keep logs for 14 days
-  level: 'info',      // Log level for the file
-  format: logFormat
-});
+if (process.env.LOG_TO_FILE === 'true') {
+  // Create a rotating file transport
+  const fileTransport = new winston.transports.DailyRotateFile({
+    filename: path.join(logDir, 'application-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true, // zip logs
+    maxSize: '10m',     // max size 10MB
+    maxFiles: '14d',    // keep logs for 14 days
+    level: 'info',      // Log level for the file
+    format: logFormat
+  });
+}
 
 // Create a logger instance
 const logger = winston.createLogger({
@@ -43,7 +45,7 @@ if (process.env.LOG_TO_CONSOLE === 'true') {
   }));
   logger.info('Console logging enabled.');
 } else {
-    logger.info('Console logging is disabled. Set LOG_TO_CONSOLE=true to enable it.');
+  logger.info('Console logging is disabled. Set LOG_TO_CONSOLE=true to enable it.');
 }
 
 
