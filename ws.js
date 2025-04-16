@@ -11,7 +11,7 @@ const ws = new WebSocket(WS_URL);
 let counter = 0;
 let keepAliveInstance;
 let keepAliveTimeout = 30000;
-const symbol = process.env.SYMBOL;
+const symbols = process.env.SYMBOL.split(',');
 
 const startKeepAlive = () => {
   const keepAliveMessage = {
@@ -33,6 +33,7 @@ ws.on('open', () => {
     type: 'SETUP',
     channel: 0,
     keepaliveInterval: 86400,
+    dataFormat: "compact",
     acceptKeepaliveTimeout: 86400,
     version: "0.1-js/1.0.0"
   };
@@ -60,6 +61,14 @@ ws.on('open', () => {
   ws.send(JSON.stringify(openMessage));
   logger.info('OPEN message sent for channel 1.');
 
+  symbols.forEach(symbol => {
+    subscribeToSymbol(symbol);
+  });
+
+  startKeepAlive();
+});
+
+function subscribeToSymbol(symbol) {
   // Subscribe to Quote events
   const subQuoteMessage = {
     type: 'FEED_SUBSCRIPTION',
@@ -101,9 +110,7 @@ ws.on('open', () => {
   };
   ws.send(JSON.stringify(subSummaryMessage));
   logger.info(`Summary Subscription message sent for ${symbol}`);
-
-  startKeepAlive();
-});
+}
 
 ws.on('message', (data) => {
   try {
