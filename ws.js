@@ -11,7 +11,7 @@ const ws = new WebSocket(WS_URL);
 let counter = 0;
 let keepAliveInstance;
 let keepAliveTimeout = 30000;
-const symbol = 'AAPL250420P00150000';
+const symbol = process.env.SYMBOL;
 
 const startKeepAlive = () => {
   const keepAliveMessage = {
