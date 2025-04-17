@@ -7,7 +7,7 @@ const WS_URL = process.env.WS_URL;
 const TOKEN = process.env.TOKEN;
 
 // Initialize WebSocket
-const ws = new WebSocket(WS_URL);
+let ws;
 let counter = 0;
 let keepAliveInstance;
 let keepAliveTimeout = 30000;
@@ -27,6 +27,7 @@ const startKeepAlive = () => {
 };
 
 function connect(){
+  ws = new WebSocket(WS_URL);
   ws.on('open', () => {
     logger.info('WebSocket connection opened.');
 
