@@ -12,6 +12,7 @@ let counter = 0;
 let keepAliveInstance;
 let keepAliveTimeout = 30000;
 const symbols = process.env.SYMBOL.split(',');
+connect();
 
 const startKeepAlive = () => {
   const keepAliveMessage = {
@@ -25,48 +26,50 @@ const startKeepAlive = () => {
   }, keepAliveTimeout);
 };
 
-ws.on('open', () => {
-  logger.info('WebSocket connection opened.');
+function connect(){
+  ws.on('open', () => {
+    logger.info('WebSocket connection opened.');
 
-  // Send SETUP message
-  const setupMessage = {
-    type: 'SETUP',
-    channel: 0,
-    keepaliveInterval: 86400,
-    dataFormat: "compact",
-    acceptKeepaliveTimeout: 86400,
-    version: "0.1-js/1.0.0"
-  };
-  ws.send(JSON.stringify(setupMessage));
-  logger.info('SETUP message sent.');
+    // Send SETUP message
+    const setupMessage = {
+      type: 'SETUP',
+      channel: 0,
+      keepaliveInterval: 86400,
+      acceptKeepaliveTimeout: 86400,
+      version: "0.1-js/1.0.0"
+    };
+    ws.send(JSON.stringify(setupMessage));
+    logger.info('SETUP message sent.');
 
-  // Send AUTH message with token
-  const authMessage = {
-    type: 'AUTH',
-    channel: 0,
-    token: TOKEN
-  };
-  ws.send(JSON.stringify(authMessage));
-  logger.info('AUTH message sent.');
+    // Send AUTH message with token
+    const authMessage = {
+      type: 'AUTH',
+      channel: 0,
+      token: TOKEN
+    };
+    ws.send(JSON.stringify(authMessage));
+    logger.info('AUTH message sent.');
 
-  // Open a new channel for FEED service
-  const openMessage = {
-    type: 'CHANNEL_REQUEST',
-    channel: 1,
-    service: 'FEED',
-    parameters: {
-      contract: 'AUTO'
-    }
-  };
-  ws.send(JSON.stringify(openMessage));
-  logger.info('OPEN message sent for channel 1.');
+    // Open a new channel for FEED service
+    const openMessage = {
+      type: 'CHANNEL_REQUEST',
+      channel: 1,
+      service: 'FEED',
+      parameters: {
+        contract: 'AUTO'
+      }
+    };
+    ws.send(JSON.stringify(openMessage));
+    logger.info('OPEN message sent for channel 1.');
 
-  symbols.forEach(symbol => {
-    subscribeToSymbol(symbol);
+    symbols.forEach(symbol => {
+      subscribeToSymbol(symbol);
+    });
+
+    startKeepAlive();
   });
+}
 
-  startKeepAlive();
-});
 
 function subscribeToSymbol(symbol) {
   // Subscribe to Quote events
@@ -132,24 +135,5 @@ ws.on('close', (code, reason) => {
   if (keepAliveInstance) {
     clearInterval(keepAliveInstance);
   }
+  connect();
 });
-
-/**
- * Generates a dxFeed-formatted option symbol
- * @param {string} underlying - e.g., "AAPL"
- * @param {string} expiration - in "YYYY-MM-DD" format
- * @param {string} type - "C" for call, "P" for put
- * @param {number} strike - numeric strike price (e.g., 200 or 175.5)
- * @returns {string} formatted symbol (e.g., AAPL250412C00200000)
- */
-function generateDxFeedOptionSymbol(underlying, expiration, type, strike) {
-  const date = new Date(expiration);
-  const yy = String(date.getFullYear()).slice(-2);
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-
-  const strikeFormatted = String(Math.round(strike * 1000)).padStart(8, '0');
-  const symbol = `${underlying.toUpperCase()}${yy}${mm}${dd}${type.toUpperCase()}${strikeFormatted}`;
-  logger.info(`Generated symbol: ${symbol}`);
-  return symbol;
-}
